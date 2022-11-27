@@ -24,7 +24,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.1",
-        "yiiboot/attributed": "dev-master",
+        "yiiboot/attributed": "^2.0",
         "yiisoft/aliases": "^2.0",
         "yiisoft/di": "^1.1",
         "yiisoft/dummy-provider": "^1.0",
