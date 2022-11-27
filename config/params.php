@@ -8,12 +8,12 @@
  * file that was distributed with this source code.
  */
 
-use Yiiboot\Routing\RouteAnnotatedHandler;
+use Yiiboot\Routing\RouteAttributedHandler;
 
 return [
-    'yiiboot/annotated' => [
+    'yiiboot/attributed' => [
         'handlers' => [
-            RouteAnnotatedHandler::class
+            RouteAttributedHandler::class
         ]
     ]
 ];

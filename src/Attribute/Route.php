@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Yiiboot\Routing\Annotation;
+namespace Yiiboot\Routing\Attribute;
 
 use Attribute;
 
@@ -26,6 +26,7 @@ class Route
     private array $methods;
     private ?array $host;
     private ?array $middleware;
+    private array $env = [];
 
     /**
      * @param string[]|string $methods
@@ -40,10 +41,9 @@ class Route
         array|string          $host = '',
         private ?int          $priority = null,
         string                $locale = null,
-        string                $format = null,
         bool                  $stateless = null,
         private ?bool         $override = null,
-        private ?string       $env = null,
+        array|string|null     $env = null,
     )
     {
         if (\is_array($path)) {
@@ -59,12 +59,12 @@ class Route
             $this->defaults['_locale'] = $locale;
         }
 
-        if (null !== $format) {
-            $this->defaults['_format'] = $format;
-        }
-
         if (null !== $stateless) {
             $this->defaults['_stateless'] = $stateless;
+        }
+
+        if (isset($env)) {
+            $this->env = (array) $env;
         }
     }
 
@@ -148,12 +148,12 @@ class Route
         return $this->priority;
     }
 
-    public function setEnv(?string $env): void
+    public function setEnv(array|string|null $env): void
     {
-        $this->env = $env;
+        $this->env = isset($env) ? (array) $env : [];
     }
 
-    public function getEnv(): ?string
+    public function getEnv(): array
     {
         return $this->env;
     }

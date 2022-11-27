@@ -10,12 +10,11 @@
 
 namespace Yiiboot\Routing;
 
-use Yiiboot\Annotated\AbstractAnnotatedHandler;
-use Yiiboot\Annotated\AnnotatedClass;
-use Yiiboot\Annotated\AnnotatedHelper;
-use Yiiboot\Annotated\AnnotatedMethod;
-use Yiiboot\Annotated\AnnotatedProperty;
-use Yiiboot\Routing\Annotation\Route as RouteAnnotation;
+use Psr\Http\Server\MiddlewareInterface;
+use Yiiboot\Attributed\AbstractAttributedHandler;
+use Yiiboot\Attributed\AttributedClass;
+use Yiiboot\Attributed\AttributedMethod;
+use Yiiboot\Routing\Attribute\Route as RouteAttribute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollectorInterface;
@@ -26,68 +25,67 @@ use Yiisoft\Router\RouteCollectorInterface;
  * @author niqingyang<niqy@qq.com>
  * @date 2022/11/23 20:08
  */
-class RouteAnnotatedHandler extends AbstractAnnotatedHandler
+class RouteAttributedHandler extends AbstractAttributedHandler
 {
     protected int $defaultRouteIndex = 0;
 
-    protected string $routeAnnotationClass = RouteAnnotation::class;
+    protected string $routeAttributeClass = RouteAttribute::class;
 
     public function __construct(private RouteCollectorInterface $collector, protected ?string $env = null)
     {
 
     }
 
-    public function getAnnotation(): string
+    public function getAttribute(): string
     {
-        return $this->routeAnnotationClass;
+        return $this->routeAttributeClass;
     }
 
-    public function handle(AnnotatedClass|AnnotatedProperty|AnnotatedMethod $annotated): void
+    public function handle(array $attributeds): void
     {
         $groups = [];
 
-        if ($annotated instanceof AnnotatedClass) {
-            $controllerClass = $annotated->getClass();
-            /* @var RouteAnnotation $controller */
-            $controller = $annotated->getAnnotation();
+        foreach ($attributeds as $attributed) {
+            if ($attributed instanceof AttributedClass) {
+                /* @var RouteAttribute $controller */
+                $controller = $attributed->getAttribute();
 
-            $prefix = $controller->getLocalizedPaths() ?: $controller->getPath();
+                $prefix = $controller->getLocalizedPaths() ?: $controller->getPath();
 
-            if (is_array($prefix)) {
-                foreach ($prefix as $locale => $localePrefix) {
-                    $groups[$locale] = Group::create($localePrefix)
+                if (is_array($prefix)) {
+                    foreach ($prefix as $locale => $localePrefix) {
+                        $groups[$locale] = Group::create($localePrefix)
+                            ->middleware(...$controller->getMiddleware())
+                            ->hosts(...$controller->getHost());
+                    }
+                } else {
+                    $groups[] = Group::create($prefix)
                         ->middleware(...$controller->getMiddleware())
                         ->hosts(...$controller->getHost());
                 }
-            } else {
-                $groups[] = Group::create($prefix)
-                    ->middleware(...$controller->getMiddleware())
-                    ->hosts(...$controller->getHost());
+            } else if ($attributed instanceof AttributedMethod) {
+                $groups = $this->addRoute($attributed, $groups);
             }
         }
 
-        foreach (AnnotatedHelper::findMethods($annotated->getClass(), $this->routeAnnotationClass) as $annotatedMethod) {
-            $groups = $this->addRoute($annotatedMethod, $groups);
-        }
-
         if ($groups) {
-            $this->collector->addGroup(...$groups);
+            $this->collector->addGroup(...array_values($groups));
         }
     }
 
     /**
      * add route
      *
-     * @param AnnotatedMethod $annotatedMethod
+     * @param AttributedMethod $attributedMethod
      * @param Group[] $groups
      * @return Group[]
      */
-    protected function addRoute(AnnotatedMethod $annotatedMethod, array $groups = []): array
+    protected function addRoute(AttributedMethod $attributedMethod, array $groups = []): array
     {
-        $class = $annotatedMethod->getClass();
-        $method = $annotatedMethod->getMethod();
-        /* @var RouteAnnotation $annot */
-        $annot = $annotatedMethod->getAnnotation();
+        $class = $attributedMethod->getClass();
+        $method = $attributedMethod->getMethod();
+        /* @var RouteAttribute $annot */
+        $annot = $attributedMethod->getAttribute();
 
         if ($annot->getEnv() && $annot->getEnv() !== $this->env) {
             return $groups;
@@ -189,7 +187,9 @@ class RouteAnnotatedHandler extends AbstractAnnotatedHandler
      */
     protected function configureRoute(Route $route, \ReflectionClass $class, \ReflectionMethod $method, object $annot): Route
     {
-        if ('__invoke' === $method->getName()) {
+        if ($class->implementsInterface(MiddlewareInterface::class)) {
+            return $route->action($class->getName());
+        } else if ('__invoke' === $method->getName()) {
             return $route->action([$class->getName(), '__invoke']);
         } else {
             return $route->action([$class->getName(), $method->getName()]);
@@ -208,7 +208,7 @@ class RouteAnnotatedHandler extends AbstractAnnotatedHandler
         }
         ++$this->defaultRouteIndex;
 
-        $name = preg_replace('/(bundle|controller)_/', '_', $name);
+        $name = preg_replace('/(controller)_/', '_', $name);
 
         if (str_ends_with($method->name, 'Action') || str_ends_with($method->name, '_action')) {
             $name = preg_replace('/action(_\d+)?$/', '\\1', $name);

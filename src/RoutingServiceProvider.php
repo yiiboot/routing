@@ -10,13 +10,10 @@
 
 namespace Yiiboot\Routing;
 
-use Psr\Container\ContainerInterface;
 use Yiisoft\Di\ServiceProviderInterface;
-use Yiisoft\Router\RouteCollector;
 
 class RoutingServiceProvider implements ServiceProviderInterface
 {
-
     public function getDefinitions(): array
     {
         return [];

@@ -1,7 +1,7 @@
 {
     "name": "yiiboot/routing",
     "type": "library",
-    "description": "the yii3 annotation routing",
+    "description": "the yii3 attribute routing",
     "keywords": [
     ],
     "homepage": "https://github.com/yiiboot",
@@ -24,7 +24,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.1",
-        "yiiboot/annotated": "^1.0.0",
+        "yiiboot/attributed": "dev-master",
         "yiisoft/aliases": "^2.0",
         "yiisoft/di": "^1.1",
         "yiisoft/dummy-provider": "^1.0",

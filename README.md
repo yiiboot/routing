@@ -6,16 +6,24 @@
     <br>
 </p>
 
-[![Latest Stable Version](https://poser.pugx.org/yiiboot/routing/v/stable.png)](https://packagist.org/packages/yiiboot/_____)
-[![Total Downloads](https://poser.pugx.org/yiiboot/routing/downloads.png)](https://packagist.org/packages/yiiboot/_____)
-[![Build status](https://github.com/yiiboot/routing/workflows/build/badge.svg)](https://github.com/yiiboot/_____/actions?query=workflow%3Abuild)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiiboot/routing/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiiboot/_____/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/yiiboot/routing/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiiboot/_____/?branch=master)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%yiiboot%2F_____%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiiboot/_____/master)
-[![static analysis](https://github.com/yiiboot/routing/workflows/static%20analysis/badge.svg)](https://github.com/yiiboot/_____/actions?query=workflow%3A%22static+analysis%22)
-[![type-coverage](https://shepherd.dev/github/yiiboot/routing/coverage.svg)](https://shepherd.dev/github/yiiboot/_____)
+[//]: # ([![Latest Stable Version]&#40;https://poser.pugx.org/yiiboot/routing/v/stable.png&#41;]&#40;https://packagist.org/packages/yiiboot/_____&#41;)
 
-The package ...
+[//]: # ([![Total Downloads]&#40;https://poser.pugx.org/yiiboot/routing/downloads.png&#41;]&#40;https://packagist.org/packages/yiiboot/_____&#41;)
+
+[//]: # ([![Build status]&#40;https://github.com/yiiboot/routing/workflows/build/badge.svg&#41;]&#40;https://github.com/yiiboot/_____/actions?query=workflow%3Abuild&#41;)
+
+[//]: # ([![Scrutinizer Code Quality]&#40;https://scrutinizer-ci.com/g/yiiboot/routing/badges/quality-score.png?b=master&#41;]&#40;https://scrutinizer-ci.com/g/yiiboot/_____/?branch=master&#41;)
+
+[//]: # ([![Code Coverage]&#40;https://scrutinizer-ci.com/g/yiiboot/routing/badges/coverage.png?b=master&#41;]&#40;https://scrutinizer-ci.com/g/yiiboot/_____/?branch=master&#41;)
+
+[//]: # ([![Mutation testing badge]&#40;https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%yiiboot%2F_____%2Fmaster&#41;]&#40;https://dashboard.stryker-mutator.io/reports/github.com/yiiboot/_____/master&#41;)
+
+[//]: # ([![static analysis]&#40;https://github.com/yiiboot/routing/workflows/static%20analysis/badge.svg&#41;]&#40;https://github.com/yiiboot/_____/actions?query=workflow%3A%22static+analysis%22&#41;)
+
+[//]: # ([![type-coverage]&#40;https://shepherd.dev/github/yiiboot/routing/coverage.svg&#41;]&#40;https://shepherd.dev/github/yiiboot/_____&#41;)
+
+An way to define an route with the Route PHP attribute. This allows to configure the route inside
+its class, without having to add any configuration in external files
 
 ## Requirements
 
@@ -30,6 +38,58 @@ composer require yiiboot/routing
 ```
 
 ## General usage
+
+the `config/params.php`
+```php
+return [
+    // ...
+    'yiiboot/attributed' => [
+        'paths' => [
+            dirname(__DIR__) . '/src/Controller'
+        ]
+    ]
+];
+```
+
+the `src/Controller/CustomController.php`
+
+```php
+namespace App\Controller;
+
+use Yiiboot\Routing\Attribute\Route;use Yiisoft\Router\CurrentRoute;
+
+#[Route('/customs', name:'customs.', middleware: [
+    FormatDataResponseAsJson::class
+])]
+final class CustomController
+{
+    #[Route('/{page:\d+}', name: 'list', method: 'GET', defaults: ['page' => 1])]
+    public function list(): ResponseInterface
+    {
+        // ...
+    }
+
+    #[Route('/{id:\d+}', name: 'view', method: 'GET')]
+    public function view(CurrentRoute $route): ResponseInterface
+    {
+        $id = $route->getArgument('id');
+        // ...
+    }
+
+    #[Route(name: 'create', method: 'POST')]
+    public function create(): ResponseInterface
+    {
+        // ...
+    }
+
+    #[Route('/{id:\d+}', name: 'delete', method: 'DELETE')]
+    public function delete(CurrentRoute $route): ResponseInterface
+    {
+        $id = $route->getArgument('id');
+        // ...
+    }
+}
+```
 
 ## Testing
 
@@ -60,8 +120,8 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 
 ### Code style
 
-Use [Rector](https://github.com/rectorphp/rector) to make codebase follow some specific rules or 
-use either newest or any specific version of PHP: 
+Use [Rector](https://github.com/rectorphp/rector) to make codebase follow some specific rules or
+use either newest or any specific version of PHP:
 
 ```shell
 ./vendor/bin/rector
@@ -69,7 +129,7 @@ use either newest or any specific version of PHP:
 
 ### Dependencies
 
-Use [ComposerRequireChecker](https://github.com/maglnet/ComposerRequireChecker) to detect transitive 
+Use [ComposerRequireChecker](https://github.com/maglnet/ComposerRequireChecker) to detect transitive
 [Composer](https://getcomposer.org/) dependencies.
 
 ## License

@@ -8,12 +8,12 @@
  * file that was distributed with this source code.
  */
 
-use Yiiboot\Routing\RouteAnnotatedHandler;
+use Yiiboot\Routing\RouteAttributedHandler;
 use Yiisoft\Definitions\Reference;
 use Yiisoft\Router\RouteCollectorInterface;
 
 return [
-    RouteAnnotatedHandler::class => [
+    RouteAttributedHandler::class => [
         '__construct()' => [
             'collector' => Reference::to(RouteCollectorInterface::class),
             'env' => $_ENV['YII_ENV'] ?? null
