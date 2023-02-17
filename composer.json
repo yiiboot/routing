@@ -29,7 +29,7 @@
         "yiisoft/di": "^1.1",
         "yiisoft/dummy-provider": "^1.0",
         "yiisoft/http": "^1.2",
-        "yiisoft/router": "^2.0"
+        "yiisoft/router": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
